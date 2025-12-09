@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape from Vardovia</title>
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            font-size: 1.2em;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4a6da7;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .text-panel {
+            flex: 1;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 5px;
+            height: 600px;
+            overflow-y: auto;
+            border: 1px solid #444;
+        }
+        
+        .image-panel {
+            width: 400px;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #game-image {
+            max-width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            margin-top: 10px;
+        }
+        
+        #input-form {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        #action-input {
+            flex: 1;
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #4a6da7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background-color: #5a7db7;
+        }
+        
+        button:disabled {
+            background-color: #6a7d97;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 4px;
+            border-left: 4px solid #4a6da7;
+        }
+        
+        .player-message {
+            color: #4a6da7;
+            font-weight: bold;
+        }
+        
+        .game-title {
+            text-align: center;
+            color: #4a6da7;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            font-size: 1.2em;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4a6da7;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background-color: #333;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="game-title">ESCAPE FROM VARDOVIA</h1>
+    
+    <div class="status-bar">
+        <div>Health: <span id="health">90</span>%</div>
+        <div>Danger: <span id="danger">1</span>/10</div>
+        <div>Location: <span id="location">Basement</span></div>
+        <div>Time: <span id="time">Night</span></div>
+    </div>
+    
+    <div class="game-container">
+        <div class="text-panel" id="game-text">
+            <div class="message">1989, somewhere in Eastern Europe... You are Arsen Dvorak, a journalist investigating the corrupt regime of Vardovia. After publishing an exposé, you were captured and imprisoned in a secret facility. You've just woken up in a dark basement, your head pounding from the drugs they gave you.</div>
+            <div class="message">Type your actions in the box below. For example: 'search the room', 'open the door', 'talk to the guard'</div>
+        </div>
+        
+        <div class="image-panel">
+            <h3>Current Scene</h3>
+            <img id="game-image" src="" alt="Game Scene" style="display: none;">
+            <div id="no-image">No image available</div>
+        </div>
+    </div>
+    
+    <div id="input-form">
+        <input type="text" id="action-input" placeholder="What do you want to do?" autofocus>
+        <button id="submit-btn">Submit</button>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading">
+        <div class="loading-spinner"></div>
+        <div>Generating Output, Please Wait...</div>
+    </div>
+    
+    <script>
+        const gameText = document.getElementById('game-text');
+        const actionInput = document.getElementById('action-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const gameImage = document.getElementById('game-image');
+        const noImage = document.getElementById('no-image');
+        
+        // Update status display
+        function updateStatus(state) {
+            document.getElementById('health').textContent = state.health || 90;
+            document.getElementById('danger').textContent = state.danger || 1;
+            document.getElementById('location').textContent = state.location || 'Unknown';
+            document.getElementById('time').textContent = state.time ? state.time.charAt(0).toUpperCase() + state.time.slice(1) : 'Unknown';
+        }
+        
+        // Add a message to the game text
+        function addMessage(text, isPlayer = false) {
+            const message = document.createElement('div');
+            message.className = `message ${isPlayer ? 'player-message' : ''}`;
+            message.textContent = isPlayer ? `> ${text}` : text;
+            gameText.appendChild(message);
+            gameText.scrollTop = gameText.scrollHeight;
+        }
+        
+        // Update the game image
+        function updateImage(imageUrl) {
+            if (imageUrl) {
+                // The URL already includes a timestamp from the server
+                gameImage.onload = function() {
+                    console.log('Image loaded successfully');
+                    gameImage.style.display = 'block';
+                    noImage.style.display = 'none';
+                };
+                gameImage.onerror = function() {
+                    console.error('Error loading image:', imageUrl);
+                    gameImage.style.display = 'none';
+                    noImage.style.display = 'block';
+                };
+                gameImage.src = imageUrl;
+            } else {
+                console.log('No image URL provided');
+                gameImage.style.display = 'none';
+                noImage.style.display = 'block';
+            }
+        }
+        
+        // Show loading overlay
+        function showLoading() {
+            try {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.style.display = 'flex';
+                }
+                submitBtn.disabled = true;
+                actionInput.disabled = true;
+            } catch (error) {
+                console.error('Error in showLoading:', error);
+            }
+        }
+        
+        // Hide loading overlay
+        function hideLoading() {
+            try {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                }
+                submitBtn.disabled = false;
+                actionInput.disabled = false;
+                actionInput.focus();
+            } catch (error) {
+                console.error('Error in hideLoading:', error);
+            }
+        }
+        
+        // Handle form submission
+        async function handleSubmit() {
+            const action = actionInput.value.trim();
+            if (!action) return;
+            
+            // Show loading state
+            showLoading();
+            
+            // Add player's action to the log
+            addMessage(action, true);
+            actionInput.value = '';
+            
+            try {
+                const response = await fetch('/api/action', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage(`Error: ${data.error}`);
+                    return;
+                }
+                
+                // Update game state
+                updateStatus(data.state);
+                
+                // Add narration to the log
+                if (data.narration) {
+                    addMessage(data.narration);
+                }
+                
+                // Update image if available
+                if (data.image_url) {
+                    updateImage(data.image_url);
+                }
+                
+            } catch (error) {
+                addMessage(`Hata oluştu: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Event listeners
+        submitBtn.addEventListener('click', handleSubmit);
+        actionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSubmit();
+            }
+        });
+        
+        // Initial setup
+        updateStatus({
+            health: 90,
+            danger: 1,
+            location: 'Basement',
+            time: 'night'
+        });
+    </script>
+</body>
+</html>
