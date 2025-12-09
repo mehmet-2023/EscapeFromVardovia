@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Escape from Vardovia</title>
+    <link rel="apple-touch-icon" href="#">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -35,41 +39,70 @@
             animation: spin 1s linear infinite;
             margin-bottom: 15px;
         }
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Courier New', monospace;
             background-color: #1a1a1a;
             color: #e0e0e0;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
             line-height: 1.6;
+            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
         .game-container {
             display: flex;
-            gap: 20px;
-            margin-top: 20px;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
         }
         
         .text-panel {
             flex: 1;
             background-color: #2a2a2a;
-            padding: 20px;
+            padding: 15px;
             border-radius: 5px;
-            height: 600px;
+            min-height: 300px;
+            max-height: 50vh;
             overflow-y: auto;
             border: 1px solid #444;
+            -webkit-overflow-scrolling: touch;
         }
         
         .image-panel {
-            width: 400px;
+            width: 100%;
             background-color: #2a2a2a;
-            padding: 20px;
+            padding: 15px;
             border-radius: 5px;
             border: 1px solid #444;
             display: flex;
             flex-direction: column;
             align-items: center;
+            order: -1;
+        }
+        
+        @media (min-width: 768px) {
+            .game-container {
+                flex-direction: row;
+                gap: 20px;
+            }
+            
+            .text-panel {
+                max-height: 600px;
+                min-height: 600px;
+                padding: 20px;
+            }
+            
+            .image-panel {
+                width: 400px;
+                order: 1;
+            }
         }
         
         #game-image {
@@ -80,29 +113,67 @@
         }
         
         #input-form {
-            margin-top: 20px;
+            margin-top: 15px;
             display: flex;
+            flex-direction: column;
             gap: 10px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            padding: 15px;
+            border-top: 1px solid #444;
+            z-index: 100;
+        }
+        
+        @media (min-width: 768px) {
+            #input-form {
+                position: static;
+                flex-direction: row;
+                background: transparent;
+                border: none;
+                padding: 15px 0;
+            }
         }
         
         #action-input {
             flex: 1;
-            padding: 10px;
+            padding: 12px 15px;
             background-color: #333;
             border: 1px solid #555;
             color: #fff;
             border-radius: 4px;
             font-family: inherit;
+            font-size: 16px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        #action-input:focus {
+            outline: none;
+            border-color: #4a6da7;
+            box-shadow: 0 0 0 2px rgba(74, 109, 167, 0.3);
         }
         
         button {
-            padding: 10px 20px;
+            padding: 12px 20px;
             background-color: #4a6da7;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-family: inherit;
+            font-size: 16px;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.2s;
+        }
+        
+        @media (min-width: 768px) {
+            button {
+                padding: 10px 20px;
+            }
         }
         
         button:hover {
@@ -166,11 +237,26 @@
         
         .status-bar {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             margin-bottom: 10px;
-            padding: 5px 10px;
-            background-color: #333;
+            padding: 8px 12px;
+            background-color: #2a2a2a;
             border-radius: 4px;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .status-item {
+            white-space: nowrap;
+            margin: 2px 0;
+        }
+        
+        @media (min-width: 480px) {
+            .status-bar {
+                font-size: 16px;
+                gap: 20px;
+            }
         }
     </style>
 </head>
@@ -178,10 +264,10 @@
     <h1 class="game-title">ESCAPE FROM VARDOVIA</h1>
     
     <div class="status-bar">
-        <div>Health: <span id="health">90</span>%</div>
-        <div>Danger: <span id="danger">1</span>/10</div>
-        <div>Location: <span id="location">Basement</span></div>
-        <div>Time: <span id="time">Night</span></div>
+        <div class="status-item">❤️ <span id="health">90</span>%</div>
+        <div class="status-item">⚠️ <span id="danger">1</span>/10</div>
+        <div class="status-item">📍 <span id="location">Basement</span></div>
+        <div class="status-item">🕒 <span id="time">Night</span></div>
     </div>
     
     <div class="game-container">
@@ -192,14 +278,16 @@
         
         <div class="image-panel">
             <h3>Current Scene</h3>
-            <img id="game-image" src="" alt="Game Scene" style="display: none;">
+            <img id="game-image" src="" alt="Game Scene" style="display: none;" loading="lazy">
             <div id="no-image">No image available</div>
         </div>
     </div>
     
+    <div style="height: 80px;"></div> <!-- Spacer for mobile input -->
+    
     <div id="input-form">
-        <input type="text" id="action-input" placeholder="What do you want to do?" autofocus>
-        <button id="submit-btn">Submit</button>
+        <input type="text" id="action-input" placeholder="What do you want to do?" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus>
+        <button id="submit-btn" type="button">Submit</button>
     </div>
     
     <!-- Loading Overlay -->
