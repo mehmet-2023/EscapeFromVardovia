@@ -1,6 +1,6 @@
 # Escape from Vardovia: An Infinite AI-Powered Text Adventure
 
-![Vardovia](static/output.png)
+![Vardovia](https://res.cloudinary.com/agent-ltc/image/upload/v1765315394/d881a7c0-acc4-4f12-92e6-8274dff53154.png)
 
 ## 🌟 Where Imagination Meets Artificial Intelligence
 
