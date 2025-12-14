@@ -5,7 +5,7 @@ import time
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
-from main import call_groq, parse_model_response, pretty_print_state, minimal_sanity_check
+from main import call_groq, parse_model_response, pretty_print_state, minimal_sanity_check, ENABLE_IMAGE_GENERATION
 
 load_dotenv()
 
@@ -53,16 +53,35 @@ MAX_STORY_LOG = 20
 def index():
     return render_template('index.html')
 
+@app.route('/api/settings/image_generation', methods=['POST'])
+def toggle_image_generation():
+    """Update image generation setting"""
+    global ENABLE_IMAGE_GENERATION
+    data = request.get_json()
+    if data is not None and 'enabled' in data:
+        ENABLE_IMAGE_GENERATION = bool(data['enabled'])
+        print(f"Image generation {'enabled' if ENABLE_IMAGE_GENERATION else 'disabled'}")
+    return jsonify({"enabled": ENABLE_IMAGE_GENERATION})
+
+@app.route('/api/settings', methods=['GET'])
+def get_settings():
+    """Get current settings"""
+    return jsonify({"image_generation": ENABLE_IMAGE_GENERATION})
+
 @app.route('/api/action', methods=['POST'])
 def handle_action():
-    global current_state, previous_state_json, story_log
+    global current_state, previous_state_json, story_log, ENABLE_IMAGE_GENERATION
     try:
         data = request.get_json()
         if not data:
             return jsonify({"error": "No data provided"}), 400
+            
         player_action = data.get('action', '').strip()
         if not player_action:
             return jsonify({"error": "No action provided"}), 400
+            
+        image_generation_enabled = data.get('image_generation_enabled', ENABLE_IMAGE_GENERATION)
+        
         print(f"Processing action: {player_action}")
         try:
             response = call_groq(
@@ -77,8 +96,9 @@ def handle_action():
         except Exception as e:
             print(f"Error in call_groq: {str(e)}", file=sys.stderr)
             return jsonify({"error": f"Error processing your request: {str(e)}"}), 500
+            
         image_url = None
-        if '[IMAGE_PROMPT:' in response and ']' in response:
+        if image_generation_enabled and ENABLE_IMAGE_GENERATION and '[IMAGE_PROMPT:' in response and ']' in response:
             before_prompt, after_prompt = response.split('[IMAGE_PROMPT:', 1)
             prompt_part, after = after_prompt.split(']', 1)
             clean_response = before_prompt.strip() + after.strip()

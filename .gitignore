@@ -22,6 +22,7 @@ wheels/
 
 
 venv/
+myenv/
 env/
 ENV/
 

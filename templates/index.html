@@ -1,440 +1,817 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Escape from Vardovia</title>
-    <link rel="apple-touch-icon" href="#">
-    <meta name="theme-color" content="#1a1a1a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: white;
-            font-size: 1.2em;
-        }
-        
-        .loading-spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #4a6da7;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-        * {
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Courier New', monospace;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px;
-            line-height: 1.6;
-            -webkit-text-size-adjust: 100%;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .text-panel {
-            flex: 1;
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 5px;
-            min-height: 300px;
-            max-height: 50vh;
-            overflow-y: auto;
-            border: 1px solid #444;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .image-panel {
-            width: 100%;
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #444;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            order: -1;
-        }
-        
-        @media (min-width: 768px) {
-            .game-container {
-                flex-direction: row;
-                gap: 20px;
-            }
-            
-            .text-panel {
-                max-height: 600px;
-                min-height: 600px;
-                padding: 20px;
-            }
-            
-            .image-panel {
-                width: 400px;
-                order: 1;
-            }
-        }
-        
-        #game-image {
-            display: block !important;
-            max-width: 100%;
-            max-height: 500px;
-            object-fit: contain;
-            margin-top: 10px;
-        }
-        
-        #input-form {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #1a1a1a;
-            padding: 15px;
-            border-top: 1px solid #444;
-            z-index: 100;
-        }
-        
-        @media (min-width: 768px) {
-            #input-form {
-                position: static;
-                flex-direction: row;
-                background: transparent;
-                border: none;
-                padding: 15px 0;
-            }
-        }
-        
-        #action-input {
-            flex: 1;
-            padding: 12px 15px;
-            background-color: #333;
-            border: 1px solid #555;
-            color: #fff;
-            border-radius: 4px;
-            font-family: inherit;
-            font-size: 16px;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-        
-        #action-input:focus {
-            outline: none;
-            border-color: #4a6da7;
-            box-shadow: 0 0 0 2px rgba(74, 109, 167, 0.3);
-        }
-        
-        button {
-            padding: 12px 20px;
-            background-color: #4a6da7;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 16px;
-            -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.2s;
-        }
-        
-        @media (min-width: 768px) {
-            button {
-                padding: 10px 20px;
-            }
-        }
-        
-        button:hover {
-            background-color: #5a7db7;
-        }
-        
-        button:disabled {
-            background-color: #6a7d97;
-            cursor: not-allowed;
-        }
-        
-        .message {
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #333;
-            border-radius: 4px;
-            border-left: 4px solid #4a6da7;
-        }
-        
-        .player-message {
-            color: #4a6da7;
-            font-weight: bold;
-        }
-        
-        .game-title {
-            text-align: center;
-            color: #4a6da7;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: white;
-            font-size: 1.2em;
-        }
-        
-        .loading-spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #4a6da7;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-        
-        .status-bar {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            background-color: #2a2a2a;
-            border-radius: 4px;
-            gap: 8px;
-            font-size: 14px;
-        }
-        
-        .status-item {
-            white-space: nowrap;
-            margin: 2px 0;
-        }
-        
-        @media (min-width: 480px) {
-            .status-bar {
-                font-size: 16px;
-                gap: 20px;
-            }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Escape from Vardovia</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --panel-bg: #111111;
+    --text: #e0e0e0;
+    --text-dim: #aaaaaa;
+    --text-glow: #a0ffa0;
+    --accent: #cc0000;
+    --accent-dark: #990000;
+    --border: #333333;
+    --glow: rgba(204, 0, 0, 0.3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    background-image: 
+      linear-gradient(rgba(20,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20,0,0,0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .container {
+    width: 100vw;
+    max-width: 100vw;
+    margin: 0 auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 8px;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 3px double var(--accent);
+    flex-shrink: 0;
+  }
+
+  .game-title {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-shadow: 0 0 10px var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 75vw;
+  }
+
+  .settings-btn {
+    background: none;
+    border: none;
+    font-size: clamp(24px, 7vw, 28px);
+    color: var(--accent);
+    cursor: pointer;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .settings-btn:hover { transform: rotate(45deg); }
+
+  .status-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 15px;
+    padding: 8px 12px;
+    background: var(--panel-bg);
+    border: 2px double var(--accent);
+    font-weight: bold;
+    font-size: clamp(0.85rem, 3.5vw, 1rem);
+    color: var(--text-glow);
+    text-shadow: 0 0 6px rgba(160,255,160,0.4);
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  .status-bar::-webkit-scrollbar { display: none; }
+
+  .status-bar::before,
+  .status-bar::after {
+    content: "★";
+    color: var(--accent);
+    font-size: clamp(0.9rem, 3.5vw, 1.2rem);
+    flex-shrink: 0;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  #image-panel {
+    background: var(--panel-bg);
+    padding: 12px;
+    border: 3px double var(--accent);
+    text-align: center;
+    box-shadow: 0 0 15px rgba(204,0,0,0.3);
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  #image-panel h3 {
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-size: clamp(1.1rem, 4.5vw, 1.3rem);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  #game-image {
+    max-width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    border: 2px solid var(--border);
+    box-shadow: 0 0 20px var(--glow);
+  }
+
+  #no-image {
+    color: var(--text-dim);
+    font-style: italic;
+    padding: 25px 10px;
+    font-size: clamp(0.95rem, 4vw, 1.1rem);
+  }
+
+  .text-panel {
+    flex: 1;
+    background: var(--panel-bg);
+    padding: clamp(12px, 4vw, 25px);
+    border: 3px double var(--accent);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .message {
+    padding: clamp(8px, 2.5vw, 12px) clamp(12px, 3.5vw, 18px);
+    background: rgba(20,0,0,0.2);
+    border-left: 4px solid var(--accent);
+    line-height: 1.6;
+    font-size: clamp(0.95rem, 3.8vw, 1.1rem);
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  .message::before {
+    content: ">";
+    color: var(--accent);
+    margin-right: 10px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .player-message {
+    background: rgba(204,0,0,0.15);
+    border-left-color: var(--accent);
+    color: #ff8888;
+    font-style: italic;
+  }
+
+  .input-area {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: var(--panel-bg);
+    border-top: 3px double var(--accent);
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  #action-input {
+    width: 100%;
+    padding: 14px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: clamp(0.95rem, 4vw, 1.05rem);
+  }
+
+  #action-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(204,0,0,0.5);
+  }
+
+  #submit-btn {
+    align-self: stretch;
+    padding: 14px;
+    background: var(--accent-dark);
+    color: white;
+    border: 2px solid var(--accent);
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: clamp(0.95rem, 4vw, 1.05rem);
+  }
+
+  #submit-btn:hover {
+    background: var(--accent);
+  }
+
+  #submit-btn:disabled {
+    background: #444;
+    cursor: not-allowed;
+  }
+
+  @media (min-width: 640px) {
+    .input-area {
+      flex-direction: row;
+    }
+
+    #submit-btn {
+      align-self: center;
+      width: auto;
+      padding: 14px 35px;
+    }
+  }
+
+  .intro-screen {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 15px;
+  }
+
+  .intro-content {
+    width: 95vw;
+    max-width: 800px;
+    padding: clamp(25px, 7vw, 50px);
+    border: 4px double var(--accent);
+    background: rgba(10,10,10,0.95);
+    text-align: center;
+    position: relative;
+  }
+
+  .intro-content::before {
+    content: "★★★";
+    position: absolute;
+    color: var(--accent);
+    font-size: clamp(1.2rem, 5vw, 1.8rem);
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .intro-title {
+    font-size: clamp(2.2rem, 9vw, 3.5rem);
+    color: var(--accent);
+    letter-spacing: 7px;
+    margin-bottom: 20px;
+    animation: glow 2s infinite alternate;
+  }
+
+  @keyframes glow {
+    from { text-shadow: 0 0 15px var(--accent); }
+    to { text-shadow: 0 0 35px var(--accent), 0 0 55px var(--accent); }
+  }
+
+  .intro-subtitle {
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    margin-bottom: 35px;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+
+  .start-button {
+    padding: clamp(12px, 3.5vw, 18px) clamp(35px, 9vw, 55px);
+    font-size: clamp(1.1rem, 4.5vw, 1.5rem);
+    background: transparent;
+    color: var(--accent);
+    border: 3px solid var(--accent);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+
+  .start-button:hover {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    color: var(--text);
+    font-size: clamp(1rem, 4.5vw, 1.2rem);
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 7px solid var(--panel-bg);
+    border-top: 7px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .settings-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--panel-bg);
+    padding: clamp(20px, 7vw, 35px);
+    border: 4px double var(--accent);
+    z-index: 1001;
+    width: 90vw;
+    max-width: 420px;
+    display: none;
+    box-shadow: 0 0 25px rgba(0,0,0,0.9);
+  }
+
+  .settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .settings-header h3 {
+    font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+    color: var(--accent);
+    letter-spacing: 3px;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: clamp(26px, 7vw, 30px);
+    cursor: pointer;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 65px;
+    height: 35px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #444;
+    transition: .4s;
+    border-radius: 35px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 28px;
+    width: 28px;
+    left: 4px;
+    bottom: 4px;
+    background: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background: var(--accent);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(30px);
+  }
+
+  .setting-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: clamp(1rem, 4vw, 1.1rem);
+  }
+
+  .language-select {
+    background: var(--panel-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 5px;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: none;
+    z-index: 1000;
+  }
+
+  .hidden { display: none !important; }
+</style>
 </head>
 <body>
-    <h1 class="game-title">ESCAPE FROM VARDOVIA</h1>
+<div class="overlay" id="overlay"></div>
+
+<div id="intro-screen" class="intro-screen">
+  <div class="intro-content">
+    <h1 class="intro-title" data-translate="game_title">Escape from Vardovia</h1>
+    <p class="intro-subtitle">
+      <span data-translate="intro_1">1989. Behind the Iron Curtain.</span><br>
+      <span data-translate="intro_2">You are Arsen Dvorak, an investigative journalist captured by the Vardovian secret police.</span><br>
+      <span data-translate="intro_3">Your only chance is to escape before they break you.</span>
+    </p>
+    <button id="start-button" class="start-button" data-translate="begin_escape">Begin Escape</button>
+  </div>
+</div>
+
+<div class="loading" id="loading-overlay">
+  <div class="spinner"></div>
+  <div data-translate="processing">Processing action...</div>
+</div>
+
+<div class="settings-panel" id="settings-panel">
+  <div class="settings-header">
+    <h3 data-translate="settings">Settings</h3>
+    <button class="close-btn" id="close-settings">×</button>
+  </div>
+  <div class="setting-item">
+    <label class="switch">
+      <input type="checkbox" id="image-generation-toggle" checked>
+      <span class="slider"></span>
+    </label>
+    <span data-translate="enable_image_generation">Enable Image Generation</span>
+  </div>
+  <div class="setting-item">
+    <label for="language-select" data-translate="language">Language:</label>
+    <select id="language-select" class="language-select">
+      <option value="en">English</option>
+      <option value="tr">Türkçe</option>
+    </select>
+  </div>
+</div>
+
+<div class="container hidden" id="game-container">
+  <header>
+    <h1 class="game-title" data-translate="game_title_upper">ESCAPE FROM VARDOVIA</h1>
+    <button class="settings-btn" id="settings-btn">⚙</button>
+  </header>
+
+  <div class="status-bar">
+    <div class="status-item">❤️ <span id="health">90</span>%</div>
+    <div class="status-item">⚠️ <span id="danger">1</span>/10</div>
+    <div class="status-item">📍 <span id="location">Basement</span></div>
+    <div class="status-item">🕒 <span id="time">22:00</span></div>
+  </div>
+
+  <div class="image-panel" id="image-panel">
+    <h3 data-translate="current_scene">Current Scene</h3>
+    <img id="game-image" src="" alt="Scene" style="display:none;">
+    <div id="no-image" data-translate="no_image">No image available</div>
+  </div>
+
+  <div class="text-panel" id="game-text">
+    <div class="message" id="welcome-message-1"></div>
+    <div class="message" id="welcome-message-2"></div>
+  </div>
+
+  <div class="input-area">
+    <input type="text" id="action-input" data-placeholder="What do you do?" placeholder="What do you do?" autocomplete="off" spellcheck="false">
+    <button id="submit-btn" data-translate="submit">Submit</button>
+  </div>
+</div>
+
+<script>
+  const introScreen = document.getElementById('intro-screen');
+  const startButton = document.getElementById('start-button');
+  const gameContainer = document.getElementById('game-container');
+  const gameText = document.getElementById('game-text');
+  const actionInput = document.getElementById('action-input');
+  const submitBtn = document.getElementById('submit-btn');
+  const gameImage = document.getElementById('game-image');
+  const noImage = document.getElementById('no-image');
+  const imagePanel = document.getElementById('image-panel');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsPanel = document.getElementById('settings-panel');
+  const closeSettings = document.getElementById('close-settings');
+  const overlay = document.getElementById('overlay');
+  const imageToggle = document.getElementById('image-generation-toggle');
+  const languageSelect = document.getElementById('language-select');
+  const savedImageSetting = localStorage.getItem('imageGenerationEnabled');
+  if (savedImageSetting !== null) {
+    imageToggle.checked = savedImageSetting === 'true';
+  }
+  
+  const translations = {
+    en: {
+      game_title: "Escape from Vardovia",
+      game_title_upper: "ESCAPE FROM VARDOVIA",
+      intro_1: "1989. Behind the Iron Curtain.",
+      intro_2: "You are Arsen Dvorak, an investigative journalist captured by the Vardovian secret police.",
+      intro_3: "Your only chance is to escape before they break you.",
+      begin_escape: "Begin Escape",
+      settings: "Settings",
+      enable_image_generation: "Enable Image Generation",
+      language: "Language:",
+      submit: "Submit",
+      processing: "Processing action...",
+      no_image: "No image available",
+      current_scene: "Current Scene",
+      welcome_1: "1989, somewhere in Eastern Europe... You are Arsen Dvorak, a journalist investigating the corrupt regime of Vardovia. After publishing an exposé, you were captured and imprisoned in a secret facility. You've just woken up in a dark basement, your head pounding from the drugs they gave you.",
+      welcome_2: "Type your actions below. Examples: 'examine room', 'try the door', 'hide'"
+    },
+    tr: {
+      game_title: "Vardovia'dan Kaçış",
+      game_title_upper: "VARDOVIA'DAN KAÇIŞ",
+      intro_1: "1989. Demir Perde'nin ardında.",
+      intro_2: "Sen, Vardovya gizli polisi tarafından yakalanan bir araştırmacı gazetecisin, Arsen Dvorak.",
+      intro_3: "Seni kırmadan önce kaçman için tek şansın bu.",
+      begin_escape: "Kaçışa Başla",
+      settings: "Ayarlar",
+      enable_image_generation: "Görsel Üretimini Etkinleştir",
+      language: "Dil:",
+      submit: "Gönder",
+      processing: "İşleniyor...",
+      no_image: "Görsel yok",
+      current_scene: "Mevcut Sahne",
+      welcome_1: "1989, Doğu Avrupa'da bir yerde... Sen, Vardovya'nın yozlaşmış rejimini araştıran bir gazetecisin, Arsen Dvorak. Bir ifşayı yayınladıktan sonra yakalandın ve gizli bir tesiste tutuklu kaldın. Az önce karanlık bir bodrum katında uyandın, kafan sana verdikleri ilaçlardan zonkluyor.",
+      welcome_2: "Aşağıya eylemlerini yaz. Örnekler: 'odayı incele', 'kapıyı dene', 'saklan'"
+    }
+  };
+  
+  let currentLanguage = localStorage.getItem('language') || 'tr';
+  
+  // Initialize welcome messages
+  function initializeWelcomeMessages() {
+    const welcome1 = document.getElementById('welcome-message-1');
+    const welcome2 = document.getElementById('welcome-message-2');
     
-    <div class="status-bar">
-        <div class="status-item">❤️ <span id="health">90</span>%</div>
-        <div class="status-item">⚠️ <span id="danger">1</span>/10</div>
-        <div class="status-item">📍 <span id="location">Basement</span></div>
-        <div class="status-item">🕒 <span id="time">Night</span></div>
-    </div>
+    if (translations[currentLanguage]) {
+      welcome1.textContent = translations[currentLanguage].welcome_1 || translations['en'].welcome_1;
+      welcome2.textContent = translations[currentLanguage].welcome_2 || translations['en'].welcome_2;
+    } else {
+      welcome1.textContent = translations['en'].welcome_1;
+      welcome2.textContent = translations['en'].welcome_2;
+    }
+  }
+  
+  function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('language', lang);
+    document.documentElement.lang = lang;
     
-    <div class="game-container">
-        <div class="text-panel" id="game-text">
-            <div class="message">1989, somewhere in Eastern Europe... You are Arsen Dvorak, a journalist investigating the corrupt regime of Vardovia. After publishing an exposé, you were captured and imprisoned in a secret facility. You've just woken up in a dark basement, your head pounding from the drugs they gave you.</div>
-            <div class="message">Type your actions in the box below. For example: 'search the room', 'open the door', 'talk to the guard'</div>
-        </div>
-        
-        <div class="image-panel">
-            <h3>Current Scene</h3>
-            <img id="game-image" src="" alt="Game Scene" style="display: none;" loading="lazy">
-            <div id="no-image">No image available</div>
-        </div>
-    </div>
+    document.querySelectorAll('[data-translate]').forEach(element => {
+      const key = element.getAttribute('data-translate');
+      if (translations[lang] && translations[lang][key]) {
+        element.textContent = translations[lang][key];
+      } else if (translations['en'][key]) {
+        element.textContent = translations['en'][key];
+      }
+    });
     
-    <div style="height: 80px;"></div> <!-- Spacer for mobile input -->
+    document.querySelectorAll('[data-placeholder]').forEach(element => {
+      const key = element.getAttribute('data-placeholder');
+      if (translations[lang] && translations[lang][key]) {
+        element.placeholder = translations[lang][key];
+      } else if (translations['en'][key]) {
+        element.placeholder = translations['en'][key];
+      }
+    });
     
-    <div id="input-form">
-        <input type="text" id="action-input" placeholder="What do you want to do?" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus>
-        <button id="submit-btn" type="button">Submit</button>
-    </div>
+    // Update welcome messages when language changes
+    initializeWelcomeMessages();
+  }
+  
+  async function translateText(text,currentLang, targetLang) {
+    try {
+      const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${currentLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`);
+      const data = await response.json();
+      return data[0].map(item => item[0]).join('');
+    } catch (error) {
+      console.error('Translation error:', error);
+      return text;
+    }
+  }
+  
+  async function translateAndAddMessage(text, isPlayer = false) {
+    if (isPlayer) {
+      addMessage(text, true);
+      if (currentLanguage !== 'en') {
+        const translatedText = await translateText(text,'tr', 'en');
+        return translatedText;
+      }
+      return text;
+    } else {
+      if (currentLanguage !== 'en') {
+        const translatedText = await translateText(text, 'en', currentLanguage);
+        addMessage(translatedText, false);
+      } else {
+        addMessage(text, false);
+      }
+      return text;
+    }
+  }
+
+  function updateImagePanel() {
+    if (imageToggle.checked) {
+      imagePanel.style.display = 'block';
+      if (gameImage.src && gameImage.src !== location.href) {
+        gameImage.style.display = 'block';
+        noImage.style.display = 'none';
+      } else {
+        gameImage.style.display = 'none';
+        noImage.style.display = 'block';
+      }
+    } else {
+      imagePanel.style.display = 'none';
+    }
     
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="loading">
-        <div class="loading-spinner"></div>
-        <div>Generating Output, Please Wait...</div>
-    </div>
+    const currentSceneText = translations[currentLanguage]?.current_scene || 'Current Scene';
+    const sceneTitle = imagePanel.querySelector('h3');
+    if (sceneTitle) {
+      sceneTitle.textContent = currentSceneText;
+    }
+  }
+
+  function updateImage(url) {
+    if (url) {
+      gameImage.src = url;
+      gameImage.style.display = imageToggle.checked ? 'block' : 'none';
+      noImage.style.display = imageToggle.checked ? 'none' : 'block';
+    } else {
+      gameImage.style.display = 'none';
+      noImage.style.display = imageToggle.checked ? 'block' : 'none';
+    }
+    updateImagePanel();
+  }
+
+  function cleanText(text) {
+    return text.replace(/\[IMAGE_PROMPT:[^\]]*\]/g, '').trim();
+  }
+
+  function addMessage(text, isPlayer = false) {
+    const div = document.createElement('div');
+    div.className = 'message' + (isPlayer ? ' player-message' : '');
+    const cleanTextContent = cleanText(text);
+    div.textContent = isPlayer ? '> ' + cleanTextContent : cleanTextContent;
+    gameText.appendChild(div);
+    gameText.scrollTop = gameText.scrollHeight;
+  }
+
+  function showLoading() {
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.querySelector('div:last-child').textContent = translations[currentLanguage]?.processing || 'Processing...';
+    submitBtn.disabled = true;
+    actionInput.disabled = true;
+  }
+
+  function hideLoading() {
+    loadingOverlay.style.display = 'none';
+    submitBtn.disabled = false;
+    actionInput.disabled = false;
+    actionInput.focus();
+  }
+
+  function updateStatus(state) {
+    document.getElementById('health').textContent = state.health ?? 90;
+    document.getElementById('danger').textContent = state.danger ?? 1;
+    document.getElementById('location').textContent = state.location ?? 'Basement';
+    document.getElementById('time').textContent = state.time ?? '22:00';
+  }
+
+  async function handleSubmit() {
+    const action = actionInput.value.trim();
+    if (!action) return;
+    const translatedAction = currentLanguage === 'en' ? action : await translateText(action,'tr', 'en');
+    addMessage(action, true);
+    actionInput.value = '';
+    showLoading();
+
+    try {
+      const res = await fetch('/api/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: translatedAction,
+          image_generation_enabled: imageToggle.checked 
+        })
+      });
+      const data = await res.json();
+      if (data.narration) translateAndAddMessage(data.narration);
+      updateStatus(data.state || {});
+      updateImage(data.image_url || '');
+    } catch (err) {
+      addMessage('Error: ' + err.message);
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // Initialize welcome messages when the page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeWelcomeMessages();
+  });
+
+  startButton.addEventListener('click', () => {
+    introScreen.style.display = 'none';
+    gameContainer.classList.remove('hidden');
+    actionInput.focus();
+    updateImagePanel();
+  });
+
+  submitBtn.addEventListener('click', handleSubmit);
+  actionInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') handleSubmit();
+  });
+
+  function openSettings() {
+    settingsPanel.style.display = 'block';
+    overlay.style.display = 'block';
+  }
+
+  function closeSettingsFunc() {
+    settingsPanel.style.display = 'none';
+    overlay.style.display = 'none';
+  }
+
+  settingsBtn.addEventListener('click', openSettings);
+  closeSettings.addEventListener('click', closeSettingsFunc);
+  overlay.addEventListener('click', closeSettingsFunc);
+  
+  // Save image generation setting when toggled
+  imageToggle.addEventListener('change', () => {
+    localStorage.setItem('imageGenerationEnabled', imageToggle.checked);
+    updateImagePanel();
     
-    <script>
-        const gameText = document.getElementById('game-text');
-        const actionInput = document.getElementById('action-input');
-        const submitBtn = document.getElementById('submit-btn');
-        const gameImage = document.getElementById('game-image');
-        const noImage = document.getElementById('no-image');
-        
-        // Update status display
-        function updateStatus(state) {
-            document.getElementById('health').textContent = state.health || 90;
-            document.getElementById('danger').textContent = state.danger || 1;
-            document.getElementById('location').textContent = state.location || 'Unknown';
-            document.getElementById('time').textContent = state.time ? state.time.charAt(0).toUpperCase() + state.time.slice(1) : 'Unknown';
-        }
-        
-        // Add a message to the game text
-        function addMessage(text, isPlayer = false) {
-            const message = document.createElement('div');
-            message.className = `message ${isPlayer ? 'player-message' : ''}`;
-            message.textContent = isPlayer ? `> ${text}` : text;
-            gameText.appendChild(message);
-            gameText.scrollTop = gameText.scrollHeight;
-        }
-        
-        // Update the game image
-        function updateImage(imageUrl) {
-            if (imageUrl) {
-                // The URL already includes a timestamp from the server
-                gameImage.onload = function() {
-                    console.log('Image loaded successfully');
-                    gameImage.style.display = 'block';
-                    noImage.style.display = 'none';
-                };
-                gameImage.onerror = function() {
-                    console.error('Error loading image:', imageUrl);
-                    gameImage.style.display = 'block';
-                    noImage.style.display = 'block';
-                };
-                gameImage.src = imageUrl;
-            } else {
-                console.log('No image URL provided');
-                gameImage.style.display = 'block';
-                noImage.style.display = 'block';
-            }
-        }
-        
-        // Show loading overlay
-        function showLoading() {
-            try {
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) {
-                    overlay.style.display = 'flex';
-                }
-                submitBtn.disabled = true;
-                actionInput.disabled = true;
-            } catch (error) {
-                console.error('Error in showLoading:', error);
-            }
-        }
-        
-        // Hide loading overlay
-        function hideLoading() {
-            try {
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                }
-                submitBtn.disabled = false;
-                actionInput.disabled = false;
-                actionInput.focus();
-            } catch (error) {
-                console.error('Error in hideLoading:', error);
-            }
-        }
-        
-        // Handle form submission
-        async function handleSubmit() {
-            const action = actionInput.value.trim();
-            if (!action) return;
-            
-            // Show loading state
-            showLoading();
-            
-            // Add player's action to the log
-            addMessage(action, true);
-            actionInput.value = '';
-            
-            try {
-                const response = await fetch('/api/action', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ action })
-                });
-                
-                const data = await response.json();
-                
-                if (data.error) {
-                    addMessage(`Error: ${data.error}`);
-                    return;
-                }
-                
-                // Update game state
-                updateStatus(data.state);
-                
-                // Add narration to the log
-                if (data.narration) {
-                    addMessage(data.narration);
-                }
-                
-                // Update image if available
-                if (data.image_url) {
-                    updateImage(data.image_url);
-                }
-                
-            } catch (error) {
-                addMessage(`Hata oluştu: ${error.message}`);
-            } finally {
-                hideLoading();
-            }
-        }
-        
-        // Event listeners
-        submitBtn.addEventListener('click', handleSubmit);
-        actionInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleSubmit();
-            }
-        });
-        
-        // Initial setup
-        updateStatus({
-            health: 90,
-            danger: 1,
-            location: 'Basement',
-            time: 'night'
-        });
-    </script>
+    // Send the setting to the server
+    fetch('/api/settings/image_generation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: imageToggle.checked })
+    });
+  });
+  
+  languageSelect.value = currentLanguage;
+  languageSelect.addEventListener('change', (e) => {
+    setLanguage(e.target.value);
+  });
+  
+  setLanguage(currentLanguage);
+  updateImagePanel();
+  
+  fetch('/api/settings/image_generation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled: imageToggle.checked })
+  });
+
+  imageToggle.addEventListener('change', updateImagePanel);
+
+  updateStatus({});
+  updateImagePanel();
+</script>
 </body>
 </html>

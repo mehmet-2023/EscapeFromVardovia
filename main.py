@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+ENABLE_IMAGE_GENERATION = True
+
 GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 STABILITY_API_KEY = os.getenv('STABILITY_API_KEY')
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
