@@ -968,14 +968,8 @@
       
       gameText.appendChild(messageDiv);
       messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      
-      // Trigger reflow to ensure the transition works
       void messageDiv.offsetWidth;
-      
-      // Fade in the message
       messageDiv.style.opacity = '1';
-      
-      // Return a resolved promise for consistency with the previous implementation
       return Promise.resolve();
     }
 

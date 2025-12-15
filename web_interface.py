@@ -3,6 +3,8 @@ import os
 import json
 import time
 import sys
+import logging
+from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 from main import call_groq, parse_model_response, pretty_print_state, minimal_sanity_check, ENABLE_IMAGE_GENERATION
@@ -11,11 +13,39 @@ load_dotenv()
 
 app = Flask(__name__, static_url_path='', static_folder='static')
 
+log_dir = Path('logs')
+log_dir.mkdir(exist_ok=True, mode=0o755)
+log_file = log_dir / 'access.log'
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file),
+        logging.StreamHandler()
+    ]
+)
+
+def get_client_ip():
+    """Get the client's IP address, handling proxy headers"""
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr or 'unknown'
+    return ip
+
+def log_action(ip, action, status='success'):
+    """Log user action with IP and timestamp"""
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    log_entry = f"{timestamp} - IP: {ip} - Action: {action} - Status: {status}"
+    logging.info(log_entry)
+
 static_dir = Path('static')
 static_dir.mkdir(exist_ok=True, mode=0o755)
 
 static_abs_path = os.path.abspath('static')
 print(f"Static files directory: {static_abs_path}")
+print(f"Logging to: {os.path.abspath(log_file)}")
 
 @app.route('/static/<path:filename>')
 def static_files(filename):
@@ -71,14 +101,21 @@ def get_settings():
 @app.route('/api/action', methods=['POST'])
 def handle_action():
     global current_state, previous_state_json, story_log, ENABLE_IMAGE_GENERATION
+    
+    client_ip = get_client_ip()
+    
     try:
         data = request.get_json()
         if not data:
+            log_action(client_ip, "No data provided", "error")
             return jsonify({"error": "No data provided"}), 400
             
         player_action = data.get('action', '').strip()
         if not player_action:
+            log_action(client_ip, "Empty action", "error")
             return jsonify({"error": "No action provided"}), 400
+            
+        log_action(client_ip, player_action)
             
         image_generation_enabled = data.get('image_generation_enabled', ENABLE_IMAGE_GENERATION)
         
@@ -95,6 +132,7 @@ def handle_action():
             print(f"API Response: {response[:200]}...")
         except Exception as e:
             print(f"Error in call_groq: {str(e)}", file=sys.stderr)
+            log_action(client_ip, f"Error in call_groq: {str(e)}", "error")
             return jsonify({"error": f"Error processing your request: {str(e)}"}), 500
             
         image_url = None
@@ -125,6 +163,7 @@ def handle_action():
             "image_url": image_url
         })
     except Exception as e:
+        log_action(client_ip, f"Server error: {str(e)}", "error")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/state', methods=['GET'])
